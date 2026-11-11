@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, StatusBar, Modal, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Platform, StatusBar, Modal, Text, TouchableOpacity } from 'react-native';
 import { useTour } from '../context/TourContext';
 import { MapViewWrapper } from '../components/MapViewWrapper';
 import { StatsHeader } from '../components/StatsHeader';
@@ -46,8 +46,8 @@ export const TourMapScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#090D16" />
+    <View style={styles.safeArea}>
+      <StatusBar barStyle="light-content" />
 
       <View style={styles.container}>
         {/* Map View Rendering Polyline and Markers */}
@@ -164,7 +164,7 @@ export const TourMapScreen: React.FC = () => {
           </View>
         </Modal>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#090D16',
+    paddingTop: Platform.OS === 'ios' ? 44 : Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 0,
   },
   container: {
     flex: 1,

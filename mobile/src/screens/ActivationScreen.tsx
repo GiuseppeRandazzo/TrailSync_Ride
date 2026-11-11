@@ -17,7 +17,7 @@ export const ActivationScreen: React.FC = () => {
   const [code, setCode] = useState<string>('');
   const [showConfig, setShowConfig] = useState<boolean>(false);
   const [apiUrl, setApiUrl] = useState<string>(api.getBaseUrl());
-  const { activateBooking, isLoading, error, setApiBaseUrl } = useTour();
+  const { activateBooking, loadDemoOfflineTour, isLoading, error, setApiBaseUrl } = useTour();
 
   const handleActivate = async (codeToUse?: string) => {
     const targetCode = (codeToUse || code).trim();
@@ -95,7 +95,17 @@ export const ActivationScreen: React.FC = () => {
           {error && (
             <View style={styles.errorBox}>
               <Text style={styles.errorEmoji}>⚠️</Text>
-              <Text style={styles.errorText}>{error}</Text>
+              <View style={styles.errorContentCol}>
+                <Text style={styles.errorText}>{error}</Text>
+                <TouchableOpacity
+                  style={styles.offlineDemoBtn}
+                  onPress={() => loadDemoOfflineTour()}
+                >
+                  <Text style={styles.offlineDemoBtnText}>
+                    ⚡ Carica Tour in Modalità Demo Locale (Offline)
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
@@ -288,7 +298,7 @@ const styles = StyleSheet.create({
   },
   errorBox: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#7F1D1D33',
     borderWidth: 1,
     borderColor: '#DC2626',
@@ -299,11 +309,28 @@ const styles = StyleSheet.create({
   errorEmoji: {
     fontSize: 16,
     marginRight: 8,
+    marginTop: 2,
+  },
+  errorContentCol: {
+    flex: 1,
   },
   errorText: {
     color: '#FCA5A5',
     fontSize: 12,
-    flex: 1,
+    lineHeight: 16,
+  },
+  offlineDemoBtn: {
+    backgroundColor: '#059669',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  offlineDemoBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
   submitButton: {
     backgroundColor: '#059669',

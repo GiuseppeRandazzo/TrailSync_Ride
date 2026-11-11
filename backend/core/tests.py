@@ -128,3 +128,14 @@ class BookingAPITests(TestCase):
         data = response.json()
         self.assertEqual(len(data["waypoints"]), 2)
         self.assertTrue(len(data["waypoints"][1]["ai_guide"]) > 10)
+
+    def test_export_gpx_endpoint(self):
+        url = reverse('tour-export-gpx', kwargs={'pk': self.tour.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'application/gpx+xml')
+        content = response.content.decode('utf-8')
+        self.assertIn('<gpx version="1.1"', content)
+        self.assertIn('<wpt', content)
+        self.assertIn('<trkpt', content)
+        self.assertIn('Start Hub', content)

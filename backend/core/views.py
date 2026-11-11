@@ -1,5 +1,7 @@
 import logging
+from xml.sax.saxutils import escape as xml_escape
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -114,6 +116,58 @@ class TourViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.exception("Failed to re-parse GPX")
             return Response({"error": f"Errore parsing GPX: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path='export-gpx')
+    def export_gpx(self, request: Request, pk=None) -> HttpResponse:
+        """
+        GET /api/tours/{id}/export-gpx/
+        Exports the tour as a standardized GPX 1.1 file enriched with AI audio guide notes
+        inside each <wpt> tag, ready for Garmin, Wahoo, and Hammerhead bike computers.
+        """
+        tour = self.get_object()
+        xml_lines = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<gpx version="1.1" creator="Outdoora Ride Platform - https://outdoora.com" xmlns="http://www.topografix.com/GPX/1/1">',
+            '  <metadata>',
+            f'    <name>{xml_escape(tour.title)}</name>',
+            f'    <desc>{xml_escape(tour.description or "")}</desc>',
+            '  </metadata>',
+        ]
+
+        # Add enriched waypoints
+        for wpt in (tour.waypoints or []):
+            lat = wpt.get('latitude', 0.0)
+            lon = wpt.get('longitude', 0.0)
+            ele = wpt.get('elevation', 0.0)
+            name = xml_escape(str(wpt.get('name', 'Waypoint')))
+            desc_text = str(wpt.get('ai_guide') or wpt.get('notes') or '')
+            desc = xml_escape(desc_text)
+            xml_lines.append(f'  <wpt lat="{lat:.6f}" lon="{lon:.6f}">')
+            xml_lines.append(f'    <ele>{ele:.1f}</ele>')
+            xml_lines.append(f'    <name>{name}</name>')
+            if desc:
+                xml_lines.append(f'    <desc>{desc}</desc>')
+            xml_lines.append('  </wpt>')
+
+        # Add track and track points
+        xml_lines.append('  <trk>')
+        xml_lines.append(f'    <name>{xml_escape(tour.title)}</name>')
+        xml_lines.append('    <type>Cycling</type>')
+        xml_lines.append('    <trkseg>')
+        for pt in (tour.polyline or []):
+            lat = pt.get('latitude', 0.0)
+            lon = pt.get('longitude', 0.0)
+            ele = pt.get('elevation', 0.0)
+            xml_lines.append(f'      <trkpt lat="{lat:.6f}" lon="{lon:.6f}"><ele>{ele:.1f}</ele></trkpt>')
+        xml_lines.append('    </trkseg>')
+        xml_lines.append('  </trk>')
+        xml_lines.append('</gpx>')
+
+        gpx_content = "\n".join(xml_lines)
+        response = HttpResponse(gpx_content, content_type='application/gpx+xml')
+        safe_title = "".join(c if c.isalnum() else "_" for c in tour.title).strip("_")
+        response['Content-Disposition'] = f'attachment; filename="outdoora_tour_{tour.id}_{safe_title}.gpx"'
+        return response
 
 
 class BookingViewSet(viewsets.ModelViewSet):

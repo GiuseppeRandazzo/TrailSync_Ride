@@ -215,19 +215,21 @@ Tutti gli endpoint rispondono con intestazioni CORS permissive configurate per l
 
 ## 5. Architettura Applicazione Mobile (`/mobile`)
 
-L'applicazione React Native è progettata secondo il pattern **Single State Store** basato su React Context (`TourContext`):
+L'applicazione React Native (basata su **Expo SDK 58**, React 19.3 e React Native 0.88) è progettata secondo il pattern **Single State Store** basato su React Context (`TourContext`):
 
 ```
 mobile/src/
 ├── context/TourContext.tsx        # Stato globale: booking, tour, rider, simulator, POI
 ├── services/
 │   ├── api.ts                     # Connessione Fetch a DRF con timeout e fallback host
+│   ├── demoData.ts                # Dati offline fallback (Lago di Como GPX + AI guides)
 │   └── speech.ts                  # Sintesi vocale multipiattaforma (Web Speech / Native)
 ├── screens/
 │   ├── ActivationScreen.tsx       # Onboarding e riscatto codice
 │   └── TourMapScreen.tsx          # Navigatore e orchestratore HUD
 ├── components/
-│   ├── MapViewWrapper.tsx         # Polyline GPX e marker interattivi
+│   ├── MapViewWrapper.native.tsx  # Mappa nativa react-native-maps (iOS/Android)
+│   ├── MapViewWrapper.tsx         # Fallback visuale interattivo per Browser Web
 │   ├── StatsHeader.tsx            # Telemetria (quota, velocità, km, partner)
 │   ├── SimulationControls.tsx     # Player simulazione GPS
 │   └── POIDetailSheet.tsx         # Scheda POI e riproduttore guida audio
@@ -301,3 +303,77 @@ Per il passaggio alla fase Enterprise/Production si raccomandano i seguenti step
 2. **Object Storage**: Configurare AWS S3 o Cloudflare R2 per i file `.gpx` tramite `django-storages`.
 3. **Code Asincrone**: Spostare l'arricchimento OpenAI su Celery + Redis per tour con oltre 50 POI.
 4. **Webhooks OTA**: Implementare endpoint webhook dedicati per l'ascolto delle notifiche di acquisto da GetYourGuide e Viator.
+
+---
+
+## 9. Guida Completa di Avvio e Test (Cheat Sheet Comandi)
+
+### 🖥️ Terminale 1: Backend Django (API & Database)
+Apri PowerShell ed esegui i seguenti comandi:
+
+```powershell
+cd C:\Users\giuse\OneDrive\Desktop\TrailSync_Ride\backend
+
+# 1. Attiva l'ambiente virtuale Python
+.\.venv\Scripts\Activate.ps1
+
+# 2. (Opzionale se già eseguito) Applica migrazioni e carica dati di prova
+python manage.py migrate
+python manage.py seed_demo_data
+
+# 3. Avvia il server REST API su tutte le interfacce di rete
+python manage.py runserver 0.0.0.0:8000
+```
+
+* **Pannello Django Admin**: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) (Login: `admin` / Password: `admin123`)
+* **Verifica API Tour**: [http://127.0.0.1:8000/api/tours/1/](http://127.0.0.1:8000/api/tours/1/)
+* **Endpoint Riscatto Prenotazione**: `POST http://127.0.0.1:8000/api/bookings/activate/`
+
+---
+
+### 📱 Terminale 2: App Mobile (Expo + React Native)
+Apri una **seconda finestra** di PowerShell ed esegui:
+
+#### Opzione A: Test su Browser Web (Chrome, Edge, Firefox)
+```powershell
+cd C:\Users\giuse\OneDrive\Desktop\TrailSync_Ride\mobile
+
+npx expo start --web
+```
+*Si aprirà automaticamente il browser con l'interfaccia mobile responsive, tracciato GPX interattivo, telemetria in tempo reale e sintetizzatore vocale audio guide.*
+
+#### Opzione B: Test su Smartphone Fisico (es. Samsung Galaxy con Expo Go)
+Per garantire che il telefono possa raggiungere il server senza problemi di firewall o Wi-Fi:
+```powershell
+cd C:\Users\giuse\OneDrive\Desktop\TrailSync_Ride\mobile
+
+npx expo start --tunnel
+```
+* **Procedura sullo Smartphone**:
+  1. Apri direttamente l'app **Expo Go** sul telefono (non scansionare con l'app Fotocamera di default).
+  2. Tocca **"Scan QR code"** all'interno di Expo Go.
+  3. Inquadra il QR code visualizzato nel terminale del PC.
+
+---
+
+### 🧪 Procedura di Test Funzionale dell'Applicazione
+
+1. **Riscatto Prenotazione**:
+   - Nella schermata iniziale tocca il pulsante **`⚡ OUT-1234`** (oppure digita a mano `OUT-1234`) e premi **"Sblocca Tour e Avvia Mappa →"**.
+   - *(In caso di mancata connessione di rete col server, è disponibile anche il pulsante `⚡ Carica Tour in Modalità Demo Locale (Offline)` per testare l'esperienza completa in autonomia).*
+2. **Navigazione & HUD Telemetria**:
+   - Visualizzerai la linea verde del percorso GPX del Lago di Como con il dislivello (+605m) e il negozio partner assegnato (*Bellagio E-Bike Experience*).
+3. **Simulatore Corsa GPS**:
+   - Tocca **`▶️ Simula Corsa GPS`** in basso: il ciclista 🚴 si muoverà lungo la traccia. Puoi impostare la velocità su **`2x`** o **`5x`**.
+   - Entrando nel raggio di 70 metri da una tappa, si aprirà automaticamente la notifica di prossimità.
+4. **Guida Vocale Culturale AI**:
+   - Tocca qualsiasi marker POI sulla mappa e premi **`▶️`** nel player: l'applicazione leggerà ad alta voce in italiano la guida culturale del luogo.
+
+---
+
+### 🔬 Esecuzione Test Unitari Automatizzati
+```powershell
+cd C:\Users\giuse\OneDrive\Desktop\TrailSync_Ride\backend
+.\.venv\Scripts\python manage.py test core
+```
+*Esegue 8 test unitari su parser GPX, formule Haversine, matching partner, export GPX ed endpoint di attivazione.*

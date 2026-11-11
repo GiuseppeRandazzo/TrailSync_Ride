@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { Booking, Tour, Waypoint, RiderLocation, PartnerShop } from '../types';
 import { api } from '../services/api';
 import { findNearbyWaypoint } from '../utils/distance';
+import { DEMO_BOOKING } from '../services/demoData';
 
 interface TourContextType {
   booking: Booking | null;
@@ -18,6 +19,7 @@ interface TourContextType {
   simulationIndex: number;
   progressPercentage: number;
   activateBooking: (code: string) => Promise<boolean>;
+  loadDemoOfflineTour: () => void;
   selectPOI: (poi: Waypoint | null) => void;
   dismissNearbyAlert: () => void;
   startSimulation: () => void;
@@ -44,7 +46,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simulationSpeed, setSimulationSpeed] = useState<number>(1);
   const [simulationIndex, setSimulationIndex] = useState<number>(0);
-  const simulationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const simulationTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const tour: Tour | null = booking?.tour || null;
   const partner: PartnerShop | null = booking?.partner_shop || null;
@@ -134,6 +136,22 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loadDemoOfflineTour = () => {
+    setIsLoading(false);
+    setError(null);
+    setBooking(DEMO_BOOKING);
+    if (DEMO_BOOKING.tour.polyline.length) {
+      const first = DEMO_BOOKING.tour.polyline[0];
+      setRiderLocation({
+        latitude: first.latitude,
+        longitude: first.longitude,
+        altitude: first.elevation,
+        speed: 0,
+      });
+      setSimulationIndex(0);
+    }
+  };
+
   const selectPOI = (poi: Waypoint | null) => {
     setSelectedPOI(poi);
     if (poi && !visitedPOIIds.includes(poi.id)) {
@@ -217,6 +235,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         simulationIndex,
         progressPercentage,
         activateBooking,
+        loadDemoOfflineTour,
         selectPOI,
         dismissNearbyAlert,
         startSimulation,
