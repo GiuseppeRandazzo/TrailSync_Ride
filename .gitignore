@@ -1,0 +1,116 @@
+# ==========================================
+# Outdoora Rider & Partner Core .gitignore
+# ==========================================
+
+# ------------------------------------------
+# Environment & Secrets (Never commit credentials)
+# ------------------------------------------
+.env
+.env.local
+.env.*.local
+*.env
+
+# ------------------------------------------
+# Python & Django
+# ------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Django Database & Static/Media
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/staticfiles/
+backend/media/*
+!backend/media/.gitkeep
+!backend/sample_data/
+
+# Unit Test & Coverage
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# ------------------------------------------
+# JavaScript / TypeScript / Node / Expo
+# ------------------------------------------
+node_modules/
+mobile/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Expo artifacts
+.expo/
+mobile/.expo/
+.expo-shared/
+mobile/.expo-shared/
+web-build/
+mobile/web-build/
+dist/
+
+# Native Mobile Build Artifacts (Prebuild / Bare workflow)
+mobile/ios/
+mobile/android/
+*.apk
+*.aab
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# TypeScript compilation cache
+*.tsbuildinfo
+
+# ------------------------------------------
+# IDE & Operating System Files
+# ------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editors & Tools
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
