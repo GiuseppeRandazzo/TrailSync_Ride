@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
+  Platform,
 } from 'react-native';
 import { Waypoint, POICategory } from '../types';
 import { speechService } from '../services/speech';
@@ -30,7 +31,7 @@ export const POIDetailSheet: React.FC<POIDetailSheetProps> = ({
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 250,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
 
     return () => {

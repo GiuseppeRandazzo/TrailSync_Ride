@@ -45,11 +45,23 @@ export const TourMapScreen: React.FC = () => {
     setShowCompletedModal(true);
   };
 
+  const isWeb = Platform.OS === 'web';
+
   return (
     <View style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
 
       <View style={styles.container}>
+        {/* Top HUD Stats (In flex flow on Web to avoid overlapping; floating on Native Map) */}
+        <View style={isWeb ? styles.webTopHudContainer : styles.topHudContainer}>
+          <StatsHeader
+            tour={tour}
+            partner={partner}
+            riderLocation={riderLocation}
+            onExit={() => setShowExitConfirm(true)}
+          />
+        </View>
+
         {/* Map View Rendering Polyline and Markers */}
         <MapViewWrapper
           polyline={tour.polyline || []}
@@ -60,19 +72,9 @@ export const TourMapScreen: React.FC = () => {
           onSelectPOI={(poi) => selectPOI(poi)}
         />
 
-        {/* Floating Top HUD Stats */}
-        <View style={styles.topHudContainer}>
-          <StatsHeader
-            tour={tour}
-            partner={partner}
-            riderLocation={riderLocation}
-            onExit={() => setShowExitConfirm(true)}
-          />
-        </View>
-
-        {/* Floating Bottom Simulation Controls (Hidden if sheet is open) */}
+        {/* Bottom Simulation Controls (Hidden if sheet is open) */}
         {!activePOI && (
-          <View style={styles.bottomControlsContainer}>
+          <View style={isWeb ? styles.webBottomControlsContainer : styles.bottomControlsContainer}>
             <SimulationControls
               isSimulating={isSimulating}
               simulationSpeed={simulationSpeed}
@@ -184,6 +186,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
+    elevation: 10,
+  },
+  webTopHudContainer: {
+    width: '100%',
+    backgroundColor: '#0F172A',
+    paddingTop: 6,
   },
   bottomControlsContainer: {
     position: 'absolute',
@@ -191,6 +199,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
+    elevation: 10,
+  },
+  webBottomControlsContainer: {
+    width: '100%',
+    backgroundColor: '#0F172A',
   },
   modalOverlay: {
     flex: 1,

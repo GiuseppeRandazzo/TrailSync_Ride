@@ -62,7 +62,7 @@ export const MapViewWrapper: React.FC<MapViewWrapperProps> = ({
         <View style={styles.webRoutePath}>
           <Text style={styles.webStartText}>🟢 Partenza: Bellagio Lakefront</Text>
           <View style={styles.webLine} />
-          <Text style={styles.webEndText}>🏁 Vetts: Madonna del Ghisallo &amp; Rifugio</Text>
+          <Text style={styles.webEndText}>🏁 Vetta: Madonna del Ghisallo &amp; Rifugio</Text>
         </View>
 
         <View style={styles.webPOIList}>
@@ -113,9 +113,8 @@ const styles = StyleSheet.create({
   webContainer: {
     flex: 1,
     backgroundColor: '#0F172A',
-    padding: 16,
-    paddingTop: 155,
-    paddingBottom: 130,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   webMapHeader: {
     backgroundColor: '#1E293B',
