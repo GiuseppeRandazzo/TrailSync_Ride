@@ -343,11 +343,11 @@ npx expo start --web
 *Si aprirà automaticamente il browser con l'interfaccia mobile responsive, tracciato GPX interattivo, telemetria in tempo reale e sintetizzatore vocale audio guide.*
 
 #### Opzione B: Test su Smartphone Fisico (es. Samsung Galaxy con Expo Go)
-Per garantire che il telefono possa raggiungere il server senza problemi di firewall o Wi-Fi:
+Per garantire che il telefono possa raggiungere il server senza problemi di firewall o Wi-Fi (senza bisogno di login su Expo):
 ```powershell
 cd C:\Users\giuse\OneDrive\Desktop\TrailSync_Ride\mobile
 
-npx expo start --tunnel
+npx expo start --tunnel ngrok
 ```
 * **Procedura sullo Smartphone**:
   1. Apri direttamente l'app **Expo Go** sul telefono (non scansionare con l'app Fotocamera di default).
